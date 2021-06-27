@@ -5,9 +5,11 @@
 package it.polito.tdp.genes;
 
 import java.net.URL;
+import java.util.Map;
 import java.util.ResourceBundle;
 
 import it.polito.tdp.genes.model.Genes;
+import it.polito.tdp.genes.model.GenesPeso;
 import it.polito.tdp.genes.model.Model;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -30,7 +32,7 @@ public class FXMLController {
     private Button btnCreaGrafo; // Value injected by FXMLLoader
 
     @FXML // fx:id="cmbGeni"
-    private ComboBox<?> cmbGeni; // Value injected by FXMLLoader
+    private ComboBox<Genes> cmbGeni; // Value injected by FXMLLoader
 
     @FXML // fx:id="btnGeniAdiacenti"
     private Button btnGeniAdiacenti; // Value injected by FXMLLoader
@@ -46,19 +48,48 @@ public class FXMLController {
 
     @FXML
     void doCreaGrafo(ActionEvent event) {
-    	
-
+    	String s = this.model.creaGrafo()+"\n";
+    	txtResult.appendText(s);
+    	this.cmbGeni.getItems().addAll(this.model.getGeniEssenziali());
     }
 
     @FXML
     void doGeniAdiacenti(ActionEvent event) {
-
+    	Genes g = this.cmbGeni.getValue();
+    	txtResult.appendText("\nGeni adiacenti a:"+g+"\n");
+    	for(GenesPeso gp : this.model.geniAdiacenti(g)) {
+    		txtResult.appendText(gp+"\n");
+    	}
+    	
     	
     }
 
     @FXML
     void doSimula(ActionEvent event) {
-
+    	Genes start = cmbGeni.getValue() ;
+    	if(start==null) {
+    		txtResult.appendText("ERRORE: scegliere un gene\n");
+    		return ;
+    	}
+    	
+    	int n ;
+    	try {
+    		n = Integer.parseInt(txtIng.getText()) ;
+    	} catch(NumberFormatException ex) {
+    		txtResult.appendText("ERRORE: numero di ingegneri è obbligatorio e deve essere un numero\n");
+    		return ;
+    	}
+    	
+    	Map<Genes, Integer> studiati = model.simulaIngegneri(start, n) ;
+    	
+    	if(studiati==null) {
+    		txtResult.appendText("ERRORE: il gene selezionato è isolato\n");
+    	} else {
+    		txtResult.appendText("Risultato simulazione\n");
+    		for(Genes g: studiati.keySet()) {
+    			txtResult.appendText(g+ " "+ studiati.get(g)+ "\n");
+    		}
+    	}
     }
 
     @FXML // This method is called by the FXMLLoader when initialization is complete
